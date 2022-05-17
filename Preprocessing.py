@@ -47,7 +47,7 @@ def prepare_data(dataframe, result_name):
 def normalize_dataframe(dataframe, result_name):
     raw_data = prepare_data(dataframe, result_name)
     features = raw_data.iloc[:,:-1]
-    norm_data = normalize(features, norm='l2', axis=0)
+    norm_data = minmax_scale(features, feature_range=(0,1))
     normalize_features = pd.DataFrame(norm_data, index=features.index, columns=features.columns)
     result = raw_data.iloc[:,-1]
     normalize_dataframe = pd.concat([normalize_features, result], axis=1)
