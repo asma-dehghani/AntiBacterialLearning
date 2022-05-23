@@ -5,10 +5,12 @@ from sklearn.tree import DecisionTreeRegressor
 from xgboost import XGBRegressor, plot_importance
 from sklearn.feature_selection import RFE, SelectFromModel 
 from sklearn.tree import DecisionTreeRegressor
+import seaborn as sns
+import pandas as pd
 
 def get_feature_name(features):
     features.columns = ['core.size.avg', 'agent', 'solvent','agent.vol', 'Ag.vol', 'Ag.concentration', 'react.temp',  
-            'react.time','diameters' ,'incubate.temp', 'incubate.time', 'cell.density', 'method', 'np.concentration']
+            'react.time','diameters' ,'incubate.temp', 'incubate.time', 'Cell density of the inoculum', 'method', 'np.concentration']
     names = list()
     for column in features:
         names.append(column)
@@ -18,29 +20,31 @@ def get_feature_name(features):
 def Decisiontree_selector(dataframe):
     features = dataframe.iloc[:,:-1]
     result = dataframe.iloc[:,-1]
-    model = RFE(estimator=DecisionTreeRegressor(), n_features_to_select=6)
+    decison_tree = DecisionTreeRegressor()
+    model = RFE(estimator=decison_tree, n_features_to_select=14)
     model.fit(features, result)
-    importance = model.ranking_
+    importance = model.estimator_.feature_importances_
     feature_name = get_feature_name(features)
-    plt.barh(feature_name, importance)
-    print(model.support_)
-    plt.title("DecisionTree Feature Ranking")
-    plt.xlabel('Importance')
-    plt.ylabel('Features')
+    importance_df=pd.DataFrame({'Name':feature_name, 'Importance':importance})
+    importance_df.sort_values(by=['Importance'], ascending=False, inplace=True)
+    sns.barplot(x='Importance', y='Name', data=importance_df)
+    plt.xlabel('Feature Importance Score')
+    plt.ylabel('Feature Name')
     plt.show()
 
 def RandomForest_selector(dataframe):
     features = dataframe.iloc[:,:-1]
     result = dataframe.iloc[:,-1]
-    model = RFE(estimator=RandomForestRegressor(), n_features_to_select=6)
+    random_forest = RandomForestRegressor()
+    model = RFE(estimator=random_forest, n_features_to_select=14)
     model.fit(features, result)
-    importance = model.ranking_
+    importance = model.estimator_.feature_importances_
     feature_name = get_feature_name(features)
-    plt.barh(feature_name, importance)
-    print(model.support_)
-    plt.title("RandomForest Feature Ranking")
-    plt.xlabel('Importance')
-    plt.ylabel('Features')
+    importance_df=pd.DataFrame({'Name':feature_name, 'Importance':importance})
+    sorted_df=importance_df.sort_values(by=['Importance'], ascending=False)
+    sns.barplot(x='Importance', y='Name', data=sorted_df)
+    plt.xlabel('Feature Importance Score')
+    plt.ylabel('Feature Name')
     plt.show()
 
 def XGBoost_selector(dataframe):

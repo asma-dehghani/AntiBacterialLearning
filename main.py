@@ -4,34 +4,20 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import Preprocessing
 import FeatureSelection
 import train
+import pandas as pd
+import Charts
 
 dataset = Preprocessing.read_dataset('/home/richel/project/AntiBacterialLearning/Book16.xlsx')
 dataframe = Preprocessing.impute(dataset)
 normalized_dataframe = Preprocessing.normalize_dataframe(dataframe, "Escherichia coli ZOI")
-final_dataframe = normalized_dataframe[['Mean of NP core size','Extract agent (g)', 'Volume of extract agent (ml)',
-'Volume of  AgNO3 (ml)','Reaction Time(min)','Concentration μg/ml','Escherichia coli ZOI']]
+final_dataframe = normalized_dataframe[['Mean of NP core size', 'AgNO3 volume  (ml)', 'Reaction temperature (0C)', 
+'Reaction time(min)', 'Method', 'Nanoparticles concentration (μg/ml)', 'Escherichia coli ZOI']]
 
-# FeatureSelection.AdaBoost_selector(normalized_dataframe)
+x_train, x_test, y_train, y_test, y_predict = train.DecisionTree(final_dataframe)
 
-result = 0
-y_t = []
-y_b = []
-for i in range(0,3):
-    y_test, y_boost = train.XGBoost(final_dataframe)
-    score = r2_score(y_test, y_boost)
-    if score > result:
-        result = score
-        y_t = y_test
-        y_b = y_boost
-print('mea = ' , mean_absolute_error(y_t, y_b))
-print('rmse = ' , math.sqrt(mean_squared_error(y_t, y_b)))
-print('r2 = ' , r2_score(y_t, y_b))
-print('mse = ' , mean_squared_error(y_t, y_b))
+print('mea = ' , mean_absolute_error(y_test, y_predict))
+print('mse = ' , mean_squared_error(y_test, y_predict))
+print('rmse = ' , math.sqrt(mean_squared_error(y_test, y_predict)))
+print('r2 = ' , r2_score(y_test, y_predict))
 
-x_ax = range(len(y_test))
-plt.plot(x_ax, y_test, label="original")
-plt.plot(x_ax, y_boost, label="predicted")
-plt.title("Antibacterial test and predicted data")
-plt.legend()
-plt.show()
-
+Charts.prediction_result(y_test, y_predict)
