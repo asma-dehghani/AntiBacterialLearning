@@ -10,7 +10,7 @@ def read_dataset(dataset_path: str):
     #deleting reference, NP core size columns from data_frame
     dataframe.drop('References', axis=1, inplace=True)
     dataframe.drop('NP', axis=1, inplace=True)
-    dataframe.drop('NP core size(nm)', axis=1, inplace=True)
+    dataframe.drop('Nanoparticle size ', axis=1, inplace=True)
 
     return dataframe
     
@@ -22,15 +22,15 @@ def impute(dataframe):
     #replace * with Nan for simplicity
     dataframe.replace('*', np.nan, inplace=True)
 
-    #filling missing values of 'Extract agent (g)' & 'Solvent (ml)' column
+    #filling missing values of 'Extract mass (g)' & 'Solvent volume (ml)' column
     imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
-    imputer.fit(dataframe[['Extract agent (g)','Solvent (ml)']])
-    dataframe[['Extract agent (g)','Solvent (ml)']] = imputer.transform(dataframe[['Extract agent (g)','Solvent (ml)']])
+    imputer.fit(dataframe[['Extract mass (g)','Solvent volume (ml)']])
+    dataframe[['Extract mass (g)','Solvent volume (ml)']] = imputer.transform(dataframe[['Extract mass (g)','Solvent volume (ml)']])
 
     #filling missing values of 'Reaction Time(min)' & 'Method' column
     time_imputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
-    time_imputer.fit(dataframe[['Reaction Time(min)','Method']])
-    dataframe[['Reaction Time(min)','Method']] = time_imputer.transform(dataframe[['Reaction Time(min)','Method']])
+    time_imputer.fit(dataframe[['Reaction time(min)','Method']])
+    dataframe[['Reaction time(min)','Method']] = time_imputer.transform(dataframe[['Reaction time(min)','Method']])
 
     return dataframe
 

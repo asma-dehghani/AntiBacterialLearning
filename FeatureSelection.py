@@ -1,4 +1,5 @@
 #Selecting important features
+from operator import index
 import matplotlib.pyplot as plt
 from sklearn.ensemble import AdaBoostRegressor, RandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
@@ -7,10 +8,11 @@ from sklearn.feature_selection import RFE, SelectFromModel
 from sklearn.tree import DecisionTreeRegressor
 import seaborn as sns
 import pandas as pd
+import Charts
 
 def get_feature_name(features):
-    features.columns = ['core.size.avg', 'agent', 'solvent','agent.vol', 'Ag.vol', 'Ag.concentration', 'react.temp',  
-            'react.time','diameters' ,'incubate.temp', 'incubate.time', 'Cell density of the inoculum', 'method', 'np.concentration']
+    features.columns = ['Average Nanoparticle Size', 'Extract Mass', 'Solvent Volume','Extract Volume ', 'AgNO3 Volume ', 'AgNO3 Concentration', 'Reaction Temperature',  
+            'Reaction Time','Diameters of Disks and Wells' ,'Incubation Temperature', 'Incubation Time', 'Bacteria Concentration', 'Method', 'Nanoparticles Concentration']
     names = list()
     for column in features:
         names.append(column)
@@ -27,10 +29,8 @@ def Decisiontree_selector(dataframe):
     feature_name = get_feature_name(features)
     importance_df=pd.DataFrame({'Name':feature_name, 'Importance':importance})
     importance_df.sort_values(by=['Importance'], ascending=False, inplace=True)
-    sns.barplot(x='Importance', y='Name', data=importance_df)
-    plt.xlabel('Feature Importance Score')
-    plt.ylabel('Feature Name')
-    plt.show()
+    print(importance_df)
+    Charts.feature_importnace(importance_df)
 
 def RandomForest_selector(dataframe):
     features = dataframe.iloc[:,:-1]
@@ -41,19 +41,19 @@ def RandomForest_selector(dataframe):
     importance = model.estimator_.feature_importances_
     feature_name = get_feature_name(features)
     importance_df=pd.DataFrame({'Name':feature_name, 'Importance':importance})
-    sorted_df=importance_df.sort_values(by=['Importance'], ascending=False)
-    sns.barplot(x='Importance', y='Name', data=sorted_df)
-    plt.xlabel('Feature Importance Score')
-    plt.ylabel('Feature Name')
-    plt.show()
+    importance_df.sort_values(by=['Importance'], ascending=False, inplace=True)
+    Charts.feature_importnace(importance_df)
 
 def XGBoost_selector(dataframe):
     features = dataframe.iloc[:,:-1]
     result = dataframe.iloc[:,-1]
     model = XGBRegressor()
     model.fit(features, result)
-    plot_importance(model)
-    plt.show()
+    feature_name = get_feature_name(features)
+    importance = model.get_booster().get_score()
+    importance_df = pd.DataFrame.from_dict({'Name': feature_name, 'Importance': importance.values()})
+    importance_df.sort_values(by=['Importance'], ascending=False, inplace=True)
+    Charts.feature_importnace(importance_df)
 
 def AdaBoost_selector(dataframe):
     features = dataframe.iloc[:,:-1]
@@ -62,10 +62,8 @@ def AdaBoost_selector(dataframe):
     model = SelectFromModel(estimator)
     model = model.fit(features, result)
     feature_name = get_feature_name(features)
-    importance = model.get_support()
-    plt.barh(feature_name, importance)
-    plt.title("AdaBoost Feature Importance")
-    plt.xlabel('Importance')
-    plt.ylabel('Features')
-    plt.show()
-    
+    importance = model.estimator_.feature_importances_
+    importance_df=pd.DataFrame({'Name':feature_name, 'Importance':importance})
+    print(importance_df)
+    importance_df.sort_values(by=['Importance'], ascending=False, inplace=True)
+    Charts.feature_importnace(importance_df)
